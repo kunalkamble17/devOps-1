@@ -1,0 +1,40 @@
+
+FROM centos:7
+
+RUN yum install epel-release -y
+RUN yum install java-11-openjdk -y
+RUN curl -O https://dlcdn.apache.org/tomcat/tomcat-8/v8.5.97/bin/apache-tomcat-8.5.97.tar.gz
+RUN tar -xzvf apache-tomcat* -C /opt
+RUN cd /opt/apache-tomcat-8.5.97/webapps/
+RUN curl -O https://s3-us-west-2.amazonaws.com/studentapi-cit/student.war
+RUN cd ../bin
+
+EXPOSE 8080
+
+WORKDIR /opt/apache-tomcat-8.5.97/bin
+
+CMD ./catlina.sh run
+--------------------------------------------------------------------------
+c tomcat
+# Use the official CentOS 7 image as the base
+FROM centos:7
+
+# Install necessary packages (Java, wget, etc.) for Tomcat and download Tomcat
+RUN yum install -y epel-release && \
+    yum install -y java-11-openjdk curl && \
+    yum clean all && \
+    curl -O https://dlcdn.apache.org/tomcat/tomcat-8/v8.5.97/bin/apache-tomcat-8.5.97.tar.gz && \
+    tar -xzvf apache-tomcat-8.5.97.tar.gz -C /opt && \
+    rm -f apache-tomcat-8.5.97.tar.gz
+
+# Download the WAR file and place it in Tomcat's webapps directory
+RUN curl -o /opt/apache-tomcat-8.5.97/webapps/student.war https://s3-us-west-2.amazonaws.com/studentapi-cit/student.war
+
+# Expose the default Tomcat port
+EXPOSE 8080
+
+# Set the working directory to Tomcat's bin directory
+WORKDIR /opt/apache-tomcat-8.5.97/bin
+
+# Start Tomcat using the catalina.sh script with the run argument
+CMD ["./catalina.sh", "run"]
